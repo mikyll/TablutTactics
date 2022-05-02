@@ -33,6 +33,15 @@
     <ClCompile Include="src\input.c">
       <Filter>File di risorse</Filter>
     </ClCompile>
+    <ClCompile Include="menu.c">
+      <Filter>File di risorse</Filter>
+    </ClCompile>
+    <ClCompile Include="settings.c">
+      <Filter>File di risorse</Filter>
+    </ClCompile>
+    <ClCompile Include="tablut.c">
+      <Filter>File di risorse</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\client.h">
@@ -60,6 +69,15 @@
       <Filter>File di risorse</Filter>
     </ClInclude>
     <ClInclude Include="src\input.h">
+      <Filter>File di risorse</Filter>
+    </ClInclude>
+    <ClInclude Include="menu.h">
+      <Filter>File di risorse</Filter>
+    </ClInclude>
+    <ClInclude Include="settings.h">
+      <Filter>File di risorse</Filter>
+    </ClInclude>
+    <ClInclude Include="tablut.h">
       <Filter>File di risorse</Filter>
     </ClInclude>
   </ItemGroup>

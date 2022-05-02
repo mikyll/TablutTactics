@@ -385,3 +385,12 @@ void drawSelectedTo()
 
 // Settings
 // Send random move on timeout?
+
+
+void selectAction()
+{
+	// output: 
+	// se non si può spostare in quella posizione: coordinate in rosso
+	// altrimenti: coordinate in verde e mostra la pedina trasparente
+
+}
