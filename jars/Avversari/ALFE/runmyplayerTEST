@@ -1,0 +1,14 @@
+#!/bin/bash
+player=$(echo ${1} | tr '[:upper:]' '[:lower:]')
+timeout=${2}
+ip=${3}
+if [[ ${player} == "white" ]]
+then
+	echo WHITE
+	/mnt/c/Program\ Files/Java/jdk-18.0.1.1/bin/java.exe -jar ALFEwhite.jar  ${timeout}  ${ip}
+fi
+if [[ ${player} == "black" ]]
+then
+	echo BLACK
+	/mnt/c/Program\ Files/Java/jdk-18.0.1.1/bin/java.exe -jar ALFEblack.jar  ${timeout}  ${ip}
+fi
