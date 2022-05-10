@@ -1,0 +1,2 @@
+cd Tablut
+Tablut.exe
