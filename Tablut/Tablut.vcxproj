@@ -19,29 +19,23 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="menu.c" />
-    <ClCompile Include="settings.c" />
-    <ClCompile Include="src\client.c" />
     <ClCompile Include="src\draw.c" />
     <ClCompile Include="src\init.c" />
     <ClCompile Include="src\input.c" />
     <ClCompile Include="src\main.c" />
-    <ClCompile Include="src\server.c" />
-    <ClCompile Include="tablut.c" />
+    <ClCompile Include="src\settings.c" />
+    <ClCompile Include="src\tablut.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="menu.h" />
-    <ClInclude Include="settings.h" />
-    <ClInclude Include="src\client.h" />
     <ClInclude Include="src\common.h" />
     <ClInclude Include="src\def.h" />
     <ClInclude Include="src\draw.h" />
     <ClInclude Include="src\init.h" />
     <ClInclude Include="src\input.h" />
     <ClInclude Include="src\main.h" />
-    <ClInclude Include="src\server.h" />
+    <ClInclude Include="src\settings.h" />
     <ClInclude Include="src\structs.h" />
-    <ClInclude Include="tablut.h" />
+    <ClInclude Include="src\tablut.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

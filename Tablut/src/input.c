@@ -2,24 +2,18 @@
 
 void doKeyUp(SDL_KeyboardEvent* event)
 {
-	/*if (event->repeat == 0)
+	if (event->repeat == 0 && event->keysym.scancode < MAX_KEYBOARD_KEYS)
 	{
-		if (event->keysym.sym == SDLK_s) // event->keysym.scancode == SDL_SCANCODE_DOWN
-		{
-			app.susDetected = 0;
-		}
-	}*/
+		app.keyboard[event->keysym.scancode] = 0;
+	}
 }
 
 void doKeyDown(SDL_KeyboardEvent* event)
 {
-	/*if (event->repeat == 0)
+	if (event->repeat == 0 && event->keysym.scancode < MAX_KEYBOARD_KEYS)
 	{
-		if (event->keysym.sym == SDLK_s) // event->keysym.scancode == SDL_SCANCODE_DOWN
-		{
-			app.susDetected = 1;
-		}
-	}*/
+		app.keyboard[event->keysym.scancode] = 1;
+	}
 }
 
 void doMouseButtonUp(SDL_MouseButtonEvent* event)
@@ -32,9 +26,24 @@ void doMouseButtonDown(SDL_MouseButtonEvent* event)
 	app.mouse.button[event->button] = 1;
 }
 
+void doMouseWheel(SDL_MouseWheelEvent* event)
+{
+	if (event->y > 0)
+	{
+		app.mouse.wheelUp = 1;
+	}
+	if (event->y < 0)
+	{
+		app.mouse.wheelDown = 1;
+	}
+}
+
 void doInput()
 {
 	SDL_Event event;
+
+	app.mouse.wheelUp = 0;
+	app.mouse.wheelDown = 0;
 
 	while (SDL_PollEvent(&event))
 	{
@@ -58,6 +67,10 @@ void doInput()
 
 		case SDL_MOUSEBUTTONUP:
 			doMouseButtonUp(&event.button);
+			break;
+
+		case SDL_MOUSEWHEEL:
+			doMouseWheel(&event.wheel);
 			break;
 
 		default:

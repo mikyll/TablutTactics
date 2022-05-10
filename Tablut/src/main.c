@@ -2,10 +2,11 @@
 
 #include <SDL2/SDL_image.h>
 
-void initBoard();
+void resetBoard();
 void drawPawns();
 void drawChoice();
 void highlightMoves(int fromX, int fromY, SDL_Rect* rH, SDL_Rect* rV);
+void movePawn(int side, int fromX, int fromY, int toX, int toY);
 
 static SDL_Texture* textureBoard;
 static SDL_Texture* texturePawnBlack;
@@ -19,11 +20,11 @@ static SDL_Rect rH, rV;
 
 int main()
 {
-	// check parameters: if "-g" => avvia la GUI
 	initSDL();
 
 	atexit(cleanup);
 
+	// Load Textures
 	textureBoard = loadTexture("gfx/board.png");
 	texturePawnBlack = loadTexture("gfx/pawnBlack.png");
 	SDL_SetTextureBlendMode(texturePawnBlack, SDL_BLENDMODE_BLEND);
@@ -33,19 +34,19 @@ int main()
 	SDL_SetTextureBlendMode(texturePawnKing, SDL_BLENDMODE_BLEND);
 
 	SDL_Surface* srfc = IMG_Load("gfx/pawnKing.png");
-
 	SDL_SetWindowIcon(app.window, srfc);
 
-	initBoard();
+	resetBoard();
+
 
 	selectedX = -1, selectedY = -1;
 	destX = -1, destY = -1;
+	int newPawn = 0;
+	int pawnToPlaceSelected = 0;
 
 	while (1)
 	{
 		app.mouse.button[MOUSE_LEFT] = 0;
-
-		// doReceive();
 
 		doInput();
 
@@ -55,9 +56,65 @@ int main()
 
 		prepareScene();
 
+		if (app.keyboard[SDL_SCANCODE_R])
+		{
+			resetBoard();
+		}
+
+		if (app.mouse.wheelUp && pawnToPlaceSelected < PAWN_KING)
+		{
+			pawnToPlaceSelected++;
+			switch (pawnToPlaceSelected)
+			{
+			case EMPTY:
+				printf("PAWN TO PLACE SELECTED: EMPTY\n");
+				break;
+			case PAWN_BLACK:
+				printf("PAWN TO PLACE SELECTED: BLACK\n");
+				break;
+			case PAWN_WHITE:
+				printf("PAWN TO PLACE SELECTED: WHITE\n");
+				break;
+			case PAWN_KING:
+				printf("PAWN TO PLACE SELECTED: KING\n");
+				break;
+
+			default:
+				break;
+			}
+		}
+		if (app.mouse.wheelDown && pawnToPlaceSelected > 0)
+		{
+			pawnToPlaceSelected--;
+			switch (pawnToPlaceSelected)
+			{
+			case EMPTY:
+				printf("PAWN TO PLACE SELECTED: EMPTY\n");
+				break;
+			case PAWN_BLACK:
+				printf("PAWN TO PLACE SELECTED: BLACK\n");
+				break;
+			case PAWN_WHITE:
+				printf("PAWN TO PLACE SELECTED: WHITE\n");
+				break;
+			case PAWN_KING:
+				printf("PAWN TO PLACE SELECTED: KING\n");
+				break;
+
+			default:
+				break;
+			}
+		}
+
+		if (app.mouse.button[MOUSE_RIGHT])
+		{
+			gameBoard[app.mouse.x / BOX_LENGTH][app.mouse.y / BOX_LENGTH] = pawnToPlaceSelected;
+			SDL_Delay(32);
+			continue;
+		}
 		if (app.mouse.button[MOUSE_LEFT])
 		{
-			printf("LEFT_CLICK: %d, %d\n", app.mouse.x, app.mouse.y);
+			//printf("LEFT_CLICK: %d, %d\n", app.mouse.x, app.mouse.y);
 			if (gameBoard[app.mouse.x / BOX_LENGTH][app.mouse.y / BOX_LENGTH] != EMPTY)
 			{
 				if (app.mouse.x / BOX_LENGTH == selectedX && app.mouse.y / BOX_LENGTH == selectedY)
@@ -72,7 +129,7 @@ int main()
 					selectedY = app.mouse.y / BOX_LENGTH;
 					printf("SELECTED: %d, %d\n", selectedX, selectedY);
 					highlightMoves(selectedX, selectedY, &rH, &rV);
-					printf("rH: w=%d, h=%d\nrV: w=%d, h=%d\n", rH.w, rH.h, rV.w, rV.h);
+					//printf("rH: w=%d, h=%d\nrV: w=%d, h=%d\n", rH.w, rH.h, rV.w, rV.h);
 				}
 			}
 		}
@@ -93,11 +150,9 @@ int main()
 			if ((app.mouse.x / BOX_LENGTH < BOARD_LENGTH && app.mouse.y / BOX_LENGTH < BOARD_LENGTH && app.mouse.x / BOX_LENGTH >= 0 && app.mouse.y / BOX_LENGTH >= 0) &&
 				gameBoard[app.mouse.x / BOX_LENGTH][app.mouse.y / BOX_LENGTH] == EMPTY)
 			{
-				int p = gameBoard[selectedX][selectedY];
-				gameBoard[selectedX][selectedY] = EMPTY;
-
+				movePawn(gameBoard[selectedX][selectedY], selectedX, selectedY, destX, destY);
 				printf("MOVED PAWN FROM: %d, %d TO: %d, %d\n", selectedX, selectedY, app.mouse.x / BOX_LENGTH, app.mouse.y / BOX_LENGTH);
-				gameBoard[app.mouse.x / BOX_LENGTH][app.mouse.y / BOX_LENGTH] = p;
+				
 				selectedX = -1;
 				selectedY = -1;
 			}
@@ -125,13 +180,13 @@ int main()
 
 		presentScene();
 
-		SDL_Delay(16);
+		SDL_Delay(32);
 	}
 
 	return 0;
 }
 
-void initBoard()
+void resetBoard()
 {
 	int i, j;
 
@@ -361,7 +416,7 @@ void highlightMoves(int fromX, int fromY, SDL_Rect* rH, SDL_Rect* rV)
 	rVer.y = rVer.y * BOX_LENGTH + 1;
 	rVer.h *= BOX_LENGTH;
 
-	printf("rHor: x=%d, y=%d, w=%d, h=%d\nrVer: x=%d, y=%d, w=%d, h=%d\n", rHor.x, rHor.y, rHor.w, rHor.h, rVer.x, rVer.y, rVer.w, rVer.h);
+	//printf("rHor: x=%d, y=%d, w=%d, h=%d\nrVer: x=%d, y=%d, w=%d, h=%d\n", rHor.x, rHor.y, rHor.w, rHor.h, rVer.x, rVer.y, rVer.w, rVer.h);
 
 	*rH = rHor;
 	*rV = rVer;
@@ -372,7 +427,7 @@ void drawHighlight()
 
 }
 
-void drawSelectedFrom()
+void drawSelection()
 {
 
 }
@@ -387,10 +442,21 @@ void drawSelectedTo()
 // Send random move on timeout?
 
 
-void selectAction()
+void selectPawn()
 {
 	// output: 
 	// se non si può spostare in quella posizione: coordinate in rosso
 	// altrimenti: coordinate in verde e mostra la pedina trasparente
 
+}
+
+void deselectPawn()
+{
+
+}
+
+void movePawn(int side, int fromX, int fromY, int toX, int toY)
+{
+	gameBoard[fromX][fromY] = EMPTY;
+	gameBoard[toX][toY] = side;
 }
