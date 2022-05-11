@@ -6,6 +6,7 @@
 static void resetBoard();
 static void resetSelected();
 static void resetDest();
+static void resetInput();
 static int isInsideBoard(int x, int y);
 static void selectPawn(int row, int column);
 static void selectDest(int row, int column);
@@ -21,6 +22,9 @@ static void drawHighlightedMoves();
 // UTILS
 static int getRowFromInt(int row);
 static int getColumnFromInt(int column);
+static void saveBoardState(int n);
+static void loadBoardState(int n);
+static void printBoardText(Board board);
 
 
 static SDL_Texture* textureBoard;
@@ -30,11 +34,20 @@ static SDL_Texture* texturePawnKing;
 
 static int selectedX, selectedY;
 static int destX, destY;
+static int pawnToPlaceSelected;
+static int iState;
 
 static SDL_Rect rH, rV;
 
 int main()
 {
+	memset(&app, 0, sizeof(App));
+	memset(&gameBoard, 0, sizeof(Board));
+	memset(&savedBoards, 0, sizeof(Board) * MAX_SAVED_BOARDS);
+
+	pawnToPlaceSelected = 0;
+	iState = 0;
+
 	initSDL();
 
 	atexit(cleanup);
@@ -54,14 +67,11 @@ int main()
 	resetBoard();
 	resetSelected();
 	resetDest();
-
-	
-	int newPawn = 0;
-	int pawnToPlaceSelected = 0;
+	saveBoardState(0);
 
 	while (1)
 	{
-		app.mouse.button[MOUSE_LEFT] = 0;
+		resetInput();
 
 		doInput();
 
@@ -79,8 +89,38 @@ int main()
 			resetDest();
 		}
 
-		// '1' ... '0' = Load/Save Board State
-		//if (app.keyboard[SDL])
+		if (app.keyboard[SDL_SCANCODE_1])
+			saveBoardState(1);
+		if (app.keyboard[SDL_SCANCODE_2])
+			saveBoardState(2);
+		if (app.keyboard[SDL_SCANCODE_3])
+			saveBoardState(3);
+		if (app.keyboard[SDL_SCANCODE_4])
+			saveBoardState(4);
+		if (app.keyboard[SDL_SCANCODE_5])
+			saveBoardState(5);
+		if (app.keyboard[SDL_SCANCODE_6])
+			saveBoardState(6);
+		if (app.keyboard[SDL_SCANCODE_7])
+			saveBoardState(7);
+		if (app.keyboard[SDL_SCANCODE_8])
+			saveBoardState(8);
+		if (app.keyboard[SDL_SCANCODE_9])
+			saveBoardState(9);
+		if (app.keyboard[SDL_SCANCODE_0])
+			saveBoardState(0);
+
+		if (app.keyboard[SDL_SCANCODE_LEFT] && iState > 0)
+		{
+			iState--;
+			loadBoardState(iState);
+		}
+		if (app.keyboard[SDL_SCANCODE_RIGHT] && iState < MAX_SAVED_BOARDS - 1)
+		{
+			iState++;
+			loadBoardState(iState);
+		}
+
 
 		// "mouse scroll" = Select Pawn to Place
 		if (app.mouse.wheelUp && pawnToPlaceSelected < PAWN_KING)
@@ -261,6 +301,26 @@ static void resetSelected()
 static void resetDest()
 {
 	destX = -1, destY = -1;
+}
+
+static void resetInput()
+{
+	app.mouse.button[MOUSE_LEFT] = 0;
+	app.mouse.button[MOUSE_RIGHT] = 0;
+
+	app.keyboard[SDL_SCANCODE_1] = 0;
+	app.keyboard[SDL_SCANCODE_2] = 0;
+	app.keyboard[SDL_SCANCODE_3] = 0;
+	app.keyboard[SDL_SCANCODE_4] = 0;
+	app.keyboard[SDL_SCANCODE_5] = 0;
+	app.keyboard[SDL_SCANCODE_6] = 0;
+	app.keyboard[SDL_SCANCODE_7] = 0;
+	app.keyboard[SDL_SCANCODE_8] = 0;
+	app.keyboard[SDL_SCANCODE_9] = 0;
+	app.keyboard[SDL_SCANCODE_0] = 0;
+
+	app.keyboard[SDL_SCANCODE_LEFT] = 0;
+	app.keyboard[SDL_SCANCODE_RIGHT] = 0;
 }
 
 static int isInsideBoard(int x, int y)
@@ -489,12 +549,32 @@ static int getColumnFromInt(int column)
 
 static void saveBoardState(int n)
 {
+	int i, j;
 
+	for (i = 0; i < BOARD_LENGTH; i++)
+	{
+		for (j = 0; j < BOARD_LENGTH; j++)
+		{
+			savedBoards[n][i][j] = gameBoard[i][j];
+		}
+	}
+
+	printf("SAVED STATE %d\n", n);
 }
 
 static void loadBoardState(int n)
 {
+	int i, j;
 
+	for (i = 0; i < BOARD_LENGTH; i++)
+	{
+		for (j = 0; j < BOARD_LENGTH; j++)
+		{
+			gameBoard[i][j] = savedBoards[n][i][j];
+		}
+	}
+
+	printf("LOADED STATE %d\n", n);
 }
 
 static void saveBoardStateToFile()
@@ -507,6 +587,37 @@ static void loadBoardStateFromFile()
 {
 	// 'l' click
 	// attempts to load from .txt file
+}
+
+static void printBoardText(Board board)
+{
+	int i, j;
+
+	for (i = 0; i < BOARD_LENGTH; i++)
+	{
+		for (j = 0; j < BOARD_LENGTH; j++)
+		{
+			switch (board[i][j])
+			{
+			case PAWN_BLACK:
+				printf("B");
+				break;
+
+			case PAWN_WHITE:
+				printf("W");
+				break;
+
+			case PAWN_KING:
+				printf("K");
+				break;
+
+			default: // EMPTY
+				printf("O");
+				break;
+			}
+		}
+		printf("\n");
+	}
 }
 
 
