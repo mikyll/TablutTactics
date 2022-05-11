@@ -114,11 +114,17 @@ int main()
 		{
 			iState--;
 			loadBoardState(iState);
+			
+			resetSelected();
+			resetDest();
 		}
 		if (app.keyboard[SDL_SCANCODE_RIGHT] && iState < MAX_SAVED_BOARDS - 1)
 		{
 			iState++;
 			loadBoardState(iState);
+
+			resetSelected();
+			resetDest();
 		}
 
 
