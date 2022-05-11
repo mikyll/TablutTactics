@@ -29,11 +29,6 @@ typedef struct {
 typedef Uint8 Board[BOARD_LENGTH][BOARD_LENGTH];
 
 typedef struct {
-	int turn;
-	int state;
-} Game;
-
-typedef struct {
 	int side;
 	int fromX;
 	int fromY;

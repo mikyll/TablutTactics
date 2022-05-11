@@ -2,11 +2,26 @@
 
 #include <SDL2/SDL_image.h>
 
-void resetBoard();
-void drawPawns();
-void drawChoice();
-void highlightMoves(int fromX, int fromY, SDL_Rect* rH, SDL_Rect* rV);
-void movePawn(int side, int fromX, int fromY, int toX, int toY);
+// LOGIC
+static void resetBoard();
+static void resetSelected();
+static void resetDest();
+static int isInsideBoard(int x, int y);
+static void selectPawn(int row, int column);
+static void selectDest(int row, int column);
+static void movePawn(int fromRow, int fromColumn, int toRow, int toColumn);
+static void highlightMoves(int fromX, int fromY, SDL_Rect* rH, SDL_Rect* rV);
+
+// DRAW
+static void drawBoard();
+static void drawPawns();
+static void drawChoice();
+static void drawHighlightedMoves();
+
+// UTILS
+static int getRowFromInt(int row);
+static int getColumnFromInt(int column);
+
 
 static SDL_Texture* textureBoard;
 static SDL_Texture* texturePawnBlack;
@@ -37,10 +52,10 @@ int main()
 	SDL_SetWindowIcon(app.window, srfc);
 
 	resetBoard();
+	resetSelected();
+	resetDest();
 
-
-	selectedX = -1, selectedY = -1;
-	destX = -1, destY = -1;
+	
 	int newPawn = 0;
 	int pawnToPlaceSelected = 0;
 
@@ -50,17 +65,24 @@ int main()
 
 		doInput();
 
-		char buffer[64];
+		/*char buffer[64];
 		sprintf(buffer, "%s %s", WINDOW_TITLE, SDL_GetTicks() % 2 == 0 ? "(WHITE turn)" : "(BLACK turn)");
-		SDL_SetWindowTitle(app.window, buffer);
+		SDL_SetWindowTitle(app.window, buffer);*/
 
 		prepareScene();
 
+		// 'r' = Reset Board
 		if (app.keyboard[SDL_SCANCODE_R])
 		{
 			resetBoard();
+			resetSelected();
+			resetDest();
 		}
 
+		// '1' ... '0' = Load/Save Board State
+		//if (app.keyboard[SDL])
+
+		// "mouse scroll" = Select Pawn to Place
 		if (app.mouse.wheelUp && pawnToPlaceSelected < PAWN_KING)
 		{
 			pawnToPlaceSelected++;
@@ -106,72 +128,73 @@ int main()
 			}
 		}
 
-		if (app.mouse.button[MOUSE_RIGHT])
+		// Check if clicked inside the board
+		if (isInsideBoard(app.mouse.x, app.mouse.y))
 		{
-			gameBoard[app.mouse.x / BOX_LENGTH][app.mouse.y / BOX_LENGTH] = pawnToPlaceSelected;
-			SDL_Delay(32);
-			continue;
-		}
-		if (app.mouse.button[MOUSE_LEFT])
-		{
-			//printf("LEFT_CLICK: %d, %d\n", app.mouse.x, app.mouse.y);
-			if (gameBoard[app.mouse.x / BOX_LENGTH][app.mouse.y / BOX_LENGTH] != EMPTY)
+			int row, column;
+
+			row = app.mouse.x / BOX_LENGTH;
+			column = app.mouse.y / BOX_LENGTH;
+
+			// "right mouse click" = place new pawn
+			if (app.mouse.button[MOUSE_RIGHT])
 			{
-				if (app.mouse.x / BOX_LENGTH == selectedX && app.mouse.y / BOX_LENGTH == selectedY)
+				//printf("RIGHT_CLICK_INSIDE_BOARD: %d, %d\n", app.mouse.x, app.mouse.y); // Test
+
+				gameBoard[app.mouse.x / BOX_LENGTH][app.mouse.y / BOX_LENGTH] = pawnToPlaceSelected;
+				SDL_Delay(32);
+				continue;
+			}
+			// "left mouse click" = select/deselect a pawn to move, or move a selected pawn
+			if (app.mouse.button[MOUSE_LEFT])
+			{
+				//printf("LEFT_CLICK_INSIDE_BOARD: %d, %d\n", app.mouse.x, app.mouse.y); // Test
+
+				// Check if there isn't a selected pawn yet
+				if (selectedX == -1 && selectedY == -1)
 				{
-					printf("DESELECTED: %d, %d\n", selectedX, selectedY);
-					selectedX = -1;
-					selectedY = -1;
+					// Check if we can select the pawn
+					if (gameBoard[row][column] != EMPTY)
+					{
+						// Select the pawn
+						selectPawn(row, column);
+
+						// Highlight the possible moves
+						highlightMoves(selectedX, selectedY, &rH, &rV);
+					}
+					else
+					{
+						// Deselect
+						resetSelected();
+					}
 				}
 				else
 				{
-					selectedX = app.mouse.x / BOX_LENGTH;
-					selectedY = app.mouse.y / BOX_LENGTH;
-					printf("SELECTED: %d, %d\n", selectedX, selectedY);
-					highlightMoves(selectedX, selectedY, &rH, &rV);
-					//printf("rH: w=%d, h=%d\nrV: w=%d, h=%d\n", rH.w, rH.h, rV.w, rV.h);
+					// Check if we can move there
+					if (gameBoard[row][column] == EMPTY)
+					{
+						// Move the pawn
+						movePawn(selectedX, selectedY, destX, destY);
+					}
+
+					// Deselect
+					resetSelected();
+					resetDest();
 				}
 			}
-		}
-		if (selectedX != -1 && selectedY != -1 && gameBoard[app.mouse.x / BOX_LENGTH][app.mouse.y / BOX_LENGTH] == EMPTY)
-		{
-			destX = app.mouse.x / BOX_LENGTH;
-			destY = app.mouse.y / BOX_LENGTH;
-		}
-		else
-		{
-			destX = -1;
-			destY = -1;
-		}
-		//SDL_SetWindowTitle(app.window, WINDOW_TITLE);
-
-		if (selectedX != -1 && selectedY != -1 && app.mouse.button[MOUSE_LEFT])
-		{
-			if ((app.mouse.x / BOX_LENGTH < BOARD_LENGTH && app.mouse.y / BOX_LENGTH < BOARD_LENGTH && app.mouse.x / BOX_LENGTH >= 0 && app.mouse.y / BOX_LENGTH >= 0) &&
-				gameBoard[app.mouse.x / BOX_LENGTH][app.mouse.y / BOX_LENGTH] == EMPTY)
-			{
-				movePawn(gameBoard[selectedX][selectedY], selectedX, selectedY, destX, destY);
-				printf("MOVED PAWN FROM: %d, %d TO: %d, %d\n", selectedX, selectedY, app.mouse.x / BOX_LENGTH, app.mouse.y / BOX_LENGTH);
-				
-				selectedX = -1;
-				selectedY = -1;
-			}
+			
+			if (selectedX != -1 && selectedY != -1 && gameBoard[row][column] == EMPTY)
+				selectDest(row, column);
+			else
+				resetDest();
 		}
 
 
-		blit(textureBoard, 0, 0, 0);
+		drawBoard();
 
 		if (selectedX != -1 && selectedY != -1)
 		{
-			
-			// Set render color to blue ( rect will be rendered in this color )
-			SDL_SetRenderDrawBlendMode(app.renderer, SDL_BLENDMODE_BLEND);
-			SDL_SetRenderDrawColor(app.renderer, 0, 255, 0, SDL_ALPHA_OPAQUE / 1.5);
-
-			// Render rect
-			SDL_RenderFillRect(app.renderer, &rH);
-			SDL_RenderFillRect(app.renderer, &rV);
-			SDL_SetRenderDrawBlendMode(app.renderer, SDL_BLENDMODE_NONE);
+			drawHighlightedMoves();
 		}
 
 		drawPawns();
@@ -186,7 +209,8 @@ int main()
 	return 0;
 }
 
-void resetBoard()
+// LOGIC
+static void resetBoard()
 {
 	int i, j;
 
@@ -230,104 +254,44 @@ void resetBoard()
 	gameBoard[4][4] = PAWN_KING;
 }
 
-void drawPawns()
+static void resetSelected()
 {
-	SDL_Texture* t;
-	int i, j;
-
-	for (i = 0; i < BOARD_LENGTH; i++)
-	{
-		for (j = 0; j < BOARD_LENGTH; j++)
-		{
-			switch (gameBoard[i][j])
-			{
-			case PAWN_BLACK:
-				t = texturePawnBlack;
-				break;
-
-			case PAWN_WHITE:
-				t = texturePawnWhite;
-				break;
-
-			case PAWN_KING:
-				t = texturePawnKing;
-				break;
-
-			default: // EMPTY
-				t = NULL;
-				break;
-			}
-
-			SDL_SetTextureAlphaMod(t, selectedX == i && selectedY == j ? SDL_ALPHA_OPAQUE / 1.3 : SDL_ALPHA_OPAQUE);
-			blit(t, i * BOX_LENGTH + 1, j * BOX_LENGTH + 1, 0);
-		}
-	}
+	selectedX = -1, selectedY = -1;
+}
+static void resetDest()
+{
+	destX = -1, destY = -1;
 }
 
-void drawChoice()
+static int isInsideBoard(int x, int y)
 {
-	SDL_Texture* t;
-
-	if (destX != -1 && destY != -1)
-	{
-		switch (gameBoard[selectedX][selectedY])
-		{
-		case PAWN_BLACK:
-			t = texturePawnBlack;
-			break;
-
-		case PAWN_WHITE:
-			t = texturePawnWhite;
-			break;
-
-		case PAWN_KING:
-			t = texturePawnKing;
-			break;
-
-		default: // EMPTY
-			t = NULL;
-			break;
-		}
-
-		SDL_SetTextureAlphaMod(t, SDL_ALPHA_OPAQUE / 1.3);
-		blit(t, destX * BOX_LENGTH + 1, destY * BOX_LENGTH + 1, 0);
-	}
+	return x > 0 && x < BOARD_LENGTH * BOX_LENGTH
+		&& y > 0 && y < BOARD_LENGTH * BOX_LENGTH;
 }
 
-void selectPawn(int side, int x, int y)
+static void selectPawn(int row, int column)
 {
-
+	selectedX = row;
+	selectedY = column;
 }
 
-int checkMove(int fromX, int fromY, int toX, int toY)
+static void selectDest(int row, int column)
 {
-	// Check out of board
-	if (fromX < 0 || fromY < 0 || fromX >= BOARD_LENGTH || fromY >= BOARD_LENGTH || toX < 0 || toY < 0 || toX >= BOARD_LENGTH || toY >= BOARD_LENGTH)
-		return EXCEPTION_BOARD;
-
-	// Check move ends on throne
-	if (toX == 4 && toY == 4)
-		return EXCEPTION_THRONE;
-
-	// Check arrival box
-	if (gameBoard[toX][toY] != EMPTY)
-		return EXCEPTION_OCCUPIED;
-	if (toX == 0 && (toY == 3 || toY == 4 || toY == 5) ||
-		toX == 1 && toY == 4 ||
-		toX == 3 && (toY == 0 || toY == 8) ||
-		toX == 4 && (toY == 0 || toY == 1 || toY == 7 || toY == 8) ||
-		toX == 5 && (toY == 0 || toY == 8) ||
-		toX == 7 && toY == 4 ||
-		toX == 8 && (toY == 3 || toY == 4 || toY == 5))
-		return EXCEPTION_CITADEL;
-
-	// Check turn
-	// side == game.turn
-	
-	return 1;
+	destX = row;
+	destY = column;
 }
 
-void highlightMoves(int fromX, int fromY, SDL_Rect* rH, SDL_Rect* rV)
+static void movePawn(int fromRow, int fromColumn, int toRow, int toColumn)
+{
+	int pawn = gameBoard[fromRow][fromColumn];
+
+	gameBoard[fromRow][fromColumn] = EMPTY;
+	gameBoard[toRow][toColumn] = pawn;
+
+	printf("MOVED PAWN FROM: %c%d, TO: %c%d\n", getRowFromInt(fromRow), getColumnFromInt(fromColumn), getRowFromInt(toRow), getColumnFromInt(toColumn)); // Test
+}
+
+static void highlightMoves(int fromX, int fromY, SDL_Rect* rH, SDL_Rect* rV)
 {
 	// Create 2 transparent Rectangles filled with yellow or another color
 	SDL_Rect rHor, rVer;
@@ -376,7 +340,7 @@ void highlightMoves(int fromX, int fromY, SDL_Rect* rH, SDL_Rect* rV)
 	rHor.x = rHor.x * BOX_LENGTH + 1;
 	rHor.y = rHor.y * BOX_LENGTH + 1;
 	rHor.w *= BOX_LENGTH;
-	
+
 	// Vertical
 	for (i = fromX, j = fromY - 1; j >= 0; j--)
 	{
@@ -422,41 +386,156 @@ void highlightMoves(int fromX, int fromY, SDL_Rect* rH, SDL_Rect* rV)
 	*rV = rVer;
 }
 
-void drawHighlight()
+// DRAW
+static void drawBoard()
+{
+	blit(textureBoard, 0, 0, 0);
+}
+
+static void drawPawns()
+{
+	SDL_Texture* t;
+	int i, j;
+
+	for (i = 0; i < BOARD_LENGTH; i++)
+	{
+		for (j = 0; j < BOARD_LENGTH; j++)
+		{
+			switch (gameBoard[i][j])
+			{
+			case PAWN_BLACK:
+				t = texturePawnBlack;
+				break;
+
+			case PAWN_WHITE:
+				t = texturePawnWhite;
+				break;
+
+			case PAWN_KING:
+				t = texturePawnKing;
+				break;
+
+			default: // EMPTY
+				t = NULL;
+				break;
+			}
+
+			SDL_SetTextureAlphaMod(t, selectedX == i && selectedY == j ? SDL_ALPHA_OPAQUE / 1.3 : SDL_ALPHA_OPAQUE);
+			blit(t, i * BOX_LENGTH + 1, j * BOX_LENGTH + 1, 0);
+		}
+	}
+}
+
+static void drawChoice()
+{
+	SDL_Texture* t;
+
+	if (destX != -1 && destY != -1)
+	{
+		switch (gameBoard[selectedX][selectedY])
+		{
+		case PAWN_BLACK:
+			t = texturePawnBlack;
+			break;
+
+		case PAWN_WHITE:
+			t = texturePawnWhite;
+			break;
+
+		case PAWN_KING:
+			t = texturePawnKing;
+			break;
+
+		default: // EMPTY
+			t = NULL;
+			break;
+		}
+
+		SDL_SetTextureAlphaMod(t, SDL_ALPHA_OPAQUE / 1.3);
+		blit(t, destX * BOX_LENGTH + 1, destY * BOX_LENGTH + 1, 0);
+	}
+}
+
+static void drawHighlightedMoves()
+{
+	// Set render color to green
+	SDL_SetRenderDrawBlendMode(app.renderer, SDL_BLENDMODE_BLEND);
+	SDL_SetRenderDrawColor(app.renderer, 0, 255, 0, SDL_ALPHA_OPAQUE / 1.5);
+
+	// Render rect
+	SDL_RenderFillRect(app.renderer, &rH);
+	SDL_RenderFillRect(app.renderer, &rV);
+	SDL_SetRenderDrawBlendMode(app.renderer, SDL_BLENDMODE_NONE);
+}
+
+
+
+
+// UTILS
+static int getRowFromInt(int row)
+{
+	if (row >= 0 && row < BOARD_LENGTH)
+		return 65 + row;
+	else return -1;
+}
+
+static int getColumnFromInt(int column)
+{
+	if (column >= 0 && column < BOARD_LENGTH)
+		return column + 1;
+	else return -1;
+}
+
+
+static void saveBoardState(int n)
 {
 
 }
 
-void drawSelection()
+static void loadBoardState(int n)
 {
 
 }
 
-void drawSelectedTo()
+static void saveBoardStateToFile()
 {
-
-}
-// Timer
-
-// Settings
-// Send random move on timeout?
-
-
-void selectPawn()
-{
-	// output: 
-	// se non si può spostare in quella posizione: coordinate in rosso
-	// altrimenti: coordinate in verde e mostra la pedina trasparente
-
+	// 's' click
+	// attempts to save to .txt file
 }
 
-void deselectPawn()
+static void loadBoardStateFromFile()
 {
-
+	// 'l' click
+	// attempts to load from .txt file
 }
 
-void movePawn(int side, int fromX, int fromY, int toX, int toY)
+
+
+// EXTRA
+/*static int checkMove(int fromX, int fromY, int toX, int toY)
 {
-	gameBoard[fromX][fromY] = EMPTY;
-	gameBoard[toX][toY] = side;
-}
+	// Check out of board
+	if (fromX < 0 || fromY < 0 || fromX >= BOARD_LENGTH || fromY >= BOARD_LENGTH || toX < 0 || toY < 0 || toX >= BOARD_LENGTH || toY >= BOARD_LENGTH)
+		return EXCEPTION_BOARD;
+
+	// Check move ends on throne
+	if (toX == 4 && toY == 4)
+		return EXCEPTION_THRONE;
+
+	// Check arrival box
+	if (gameBoard[toX][toY] != EMPTY)
+		return EXCEPTION_OCCUPIED;
+	if (toX == 0 && (toY == 3 || toY == 4 || toY == 5) ||
+		toX == 1 && toY == 4 ||
+		toX == 3 && (toY == 0 || toY == 8) ||
+		toX == 4 && (toY == 0 || toY == 1 || toY == 7 || toY == 8) ||
+		toX == 5 && (toY == 0 || toY == 8) ||
+		toX == 7 && toY == 4 ||
+		toX == 8 && (toY == 3 || toY == 4 || toY == 5))
+		return EXCEPTION_CITADEL;
+
+	// Check turn
+	// side == game.turn
+
+	return 1;
+}*/
