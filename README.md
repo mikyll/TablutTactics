@@ -1,12 +1,18 @@
 <h1 align="center">Tablut Tactics</h1>
 
-Tablut Tactics è un'applicazione grafica creata con l'obbiettivo di facilitare la comprensione delle meccaniche del gioco Tablut, con le regole di Ashton, e l'ideazione di strategie. che permette di visualizzare una tavola da gioco di Tablut con le regole di Ashton
+<div align="center">
+  Tablut Tactics è un'applicazione grafica creata con l'obiettivo di facilitare la comprensione delle meccaniche di gioco, e l'ideazione di strategie, di Tablut con le regole di Ashton.
+  In particolare, permette di inizializzare la tavolo da gioco, con la formazione di partenza, e modificarla a piacimento, muovendo le pedine e creando configurazioni personalizzate.
+  Inoltre, è possibile visualizzare i movimenti permessi a ciascuna pedina.
+</div>
+  
+### Demo
 
+### Utilizzo
 
-
-### Regole del Gioco
 ### Regole di Gioco
 <img align="right" width="280" height="280" src="https://github.com/mikyll/TablutTactics/blob/main/Tablut/gfx/board_initial_state.png">
+
 **_Tablut_** è un antico gioco da tavolo di origini nordiche, la cui storia non è del tutto certa.
 Esistono diverse regole, ma quelle descritte in questa pagina, chiamate anche "Regole di Ashton", sono le regole adottate per la challenge.
 
@@ -47,7 +53,6 @@ Il gioco **termina** quando:
 - un giocatore non può più muovere pedine, in questo caso tale giocatore perde;
 - lo stato di gioco si ripete due volte, in questo caso si ha un pareggio.
 
-
-### TO-DO
-- [ ] Load/Save state to/from file
-- [ ] Activate game mechanics (eating pawns, moving just where it can, turns, ...)
+### Sviluppi Futuri
+- [ ] Caricamento/Salvataggio dello stato verso/da file
+- [ ] Attivazione delle meccaniche del gioco (pedine mangiate, movimento vincolato, gestione turni)
