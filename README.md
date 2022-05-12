@@ -9,6 +9,9 @@
 ### Demo
 
 ### Utilizzo
+1. Scaricare l'[ultima versione](https://github.com/mikyll/TablutTactics/releases/latest)
+2. Estrarre l'archivio
+3. Eseguire il *Launcher*
 
 ### Regole di Gioco
 <img align="right" width="280" height="280" src="https://github.com/mikyll/TablutTactics/blob/main/Tablut/gfx/boardBase.png">
