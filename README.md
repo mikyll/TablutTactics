@@ -13,7 +13,16 @@
 2. Estrarre l'archivio
 3. Eseguire il *Launcher*
 
-### Regole di Gioco
+#### Comandi
+- mouse `click sinistro`
+  - su una pedina: seleziona/deseleziona la pedina;
+  - su uno spazio vuoto (se è stata selezionata una pedina), muove la pedina in quella posizione (non tenendo conto dei vincoli o delle mosse possibili);
+- mouse `click destro`: modifica il contenuto di una casella, in base al tipo di pedina selezionata (EMPTY, BLACK, WHITE, KING);
+- tastiera `r`: resetta la tavola di gioco con la configurazione iniziale;
+- tastiera numeri `0-9`: salva la configurazione corrente nell'indice relativo al numero
+- tastiera frecce `<-` e `->`: carica la configurazione salvata all'indice relativo al numero
+
+### Regole di Gioco di Tablut
 <img align="right" width="280" height="280" src="https://github.com/mikyll/TablutTactics/blob/main/Tablut/gfx/boardBase.png">
 
 **_Tablut_** è un antico gioco da tavolo di origini nordiche, la cui storia non è del tutto certa.
@@ -60,4 +69,4 @@ Il gioco **termina** quando:
 
 ### Sviluppi Futuri
 - [ ] Caricamento/Salvataggio dello stato verso/da file
-- [ ] Attivazione delle meccaniche del gioco (pedine mangiate, movimento vincolato, gestione turni)
+- [ ] Attivazione delle meccaniche del gioco (pedine mangiate, movimento vincolato, gestione turni), tramite 'g'
