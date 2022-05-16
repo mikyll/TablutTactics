@@ -70,3 +70,4 @@ Il gioco **termina** quando:
 ### Sviluppi Futuri
 - [ ] Caricamento/Salvataggio dello stato verso/da file
 - [ ] Attivazione delle meccaniche del gioco (pedine mangiate, movimento vincolato, gestione turni), tramite 'g'
+- [ ] Stampare in output lo stato della board, così da poterlo copiare e incollare (ad esempio in un programma Java che testa l'euristica partendo da un certo stato)
