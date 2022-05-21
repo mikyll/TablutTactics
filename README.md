@@ -5,8 +5,20 @@
   In particolare, permette di inizializzare la tavolo da gioco, con la formazione di partenza, e modificarla a piacimento, muovendo le pedine e creando configurazioni personalizzate.
   Inoltre, è possibile visualizzare i movimenti permessi a ciascuna pedina.
 </div>
-  
+
+
+
 ### Demo
+<table>
+  <tr>
+    <td width="47%"><img src="./Tablut/gfx/demo_text_output.gif"/></td>
+    <td width="53%"><img src="./Tablut/gfx/demo_video_output.gif"/></td>
+  </tr>
+  <tr>
+    <td>Text output</td>
+    <td>Video output</td>
+  </tr>
+</table>
 
 ### Utilizzo
 1. Scaricare l'[ultima versione](https://github.com/mikyll/TablutTactics/releases/latest)
