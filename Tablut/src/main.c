@@ -188,11 +188,11 @@ int main()
 				//printf("RIGHT_CLICK_INSIDE_BOARD: %d, %d\n", app.mouse.x, app.mouse.y); // Test
 
 				gameBoard[app.mouse.x / BOX_LENGTH][app.mouse.y / BOX_LENGTH] = pawnToPlaceSelected;
-				SDL_Delay(32);
-				continue;
+				resetSelected();
 			}
+
 			// "left mouse click" = select/deselect a pawn to move, or move a selected pawn
-			if (app.mouse.button[MOUSE_LEFT])
+			else if (app.mouse.button[MOUSE_LEFT])
 			{
 				//printf("LEFT_CLICK_INSIDE_BOARD: %d, %d\n", app.mouse.x, app.mouse.y); // Test
 
@@ -234,7 +234,6 @@ int main()
 			else
 				resetDest();
 		}
-
 
 		drawBoard();
 
@@ -312,7 +311,7 @@ static void resetDest()
 static void resetInput()
 {
 	app.mouse.button[MOUSE_LEFT] = 0;
-	app.mouse.button[MOUSE_RIGHT] = 0;
+	//app.mouse.button[MOUSE_RIGHT] = 0;
 
 	app.keyboard[SDL_SCANCODE_1] = 0;
 	app.keyboard[SDL_SCANCODE_2] = 0;
