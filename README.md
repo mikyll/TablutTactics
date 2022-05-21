@@ -14,7 +14,7 @@
     <td width="47%"><img src="./Tablut/gfx/demo_text_output.gif"/></td>
     <td width="53%"><img src="./Tablut/gfx/demo_video_output.gif"/></td>
   </tr>
-  <tr>
+  <tr align="center">
     <td>Text output</td>
     <td>Video output</td>
   </tr>
