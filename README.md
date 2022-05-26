@@ -15,8 +15,8 @@
     <td width="53%"><img src="./Tablut/gfx/demo_video_output.gif"/></td>
   </tr>
   <tr align="center">
-    <td>Text output</td>
-    <td>Video output</td>
+    <td><b>Text output</b></td>
+    <td><b>Video output</b></td>
   </tr>
 </table>
 
